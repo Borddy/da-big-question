@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>May I Be Your Boyfriend?</title>
+  <title>For Tina</title>
   <style>
     :root {
       --bg-a: #ff8fbd;
@@ -255,6 +255,7 @@
       width: min(1180px, 100%);
       max-height: min(94vh, 900px);
       overflow: hidden;
+      overscroll-behavior: contain;
       padding: clamp(16px, 2.2vw, 26px);
       border: 1px solid rgba(255, 255, 255, 0.78);
       border-radius: 28px;
@@ -402,6 +403,12 @@
     }
 
     @media (max-width: 900px) {
+      .modal-window {
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
       .gallery-layout {
         grid-template-columns: 1fr;
       }
@@ -449,6 +456,8 @@
 
       .modal-window {
         border-radius: 22px;
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
       }
     }
 
@@ -562,7 +571,7 @@
 
           <!-- REPLACE GALLERY PHOTO 6 -->
           <figure>
-            <img src="https://cdn.discordapp.com/attachments/749739609445105784/1524274860032000192/IMG_2798.png?ex=6a4f2716&is=6a4dd596&hm=a71295afb81dfbc9e4db99aeb25e59234ac161cce0010bf6ebffa2411bdbfc0c&">
+            <img src="https://cdn.discordapp.com/attachments/749739609445105784/1524297506068893826/image.jpg?ex=6a4f3c2d&is=6a4deaad&hm=14c6d71c2a3bcfce6445c54d0ccffd92c54be12d8153a571b7b0dbd724de7565&">
           </figure>
 
           <!-- REPLACE GALLERY PHOTO 7 -->
