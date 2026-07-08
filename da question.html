@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>May I Be Your Boyfriend?</title>
+  <style>
+    :root {
+      --bg-a: #ff8fbd;
+      --bg-b: #ff5fa2;
+      --bg-c: #ffb3d2;
+      --rose: #ff6f9f;
+      --rose-deep: #c94d73;
+      --ink: #4b2432;
+      --muted: #895567;
+      --white: #ffffff;
+      --green: #25c86c;
+      --red: #ff4f6f;
+      --shadow: 0 24px 70px rgba(185, 73, 112, 0.22);
+      --soft-shadow: 0 16px 38px rgba(185, 73, 112, 0.16);
+      font-family: "Quicksand", "Poppins", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 14%, rgba(255, 218, 232, 0.72) 0 9rem, transparent 18rem),
+        radial-gradient(circle at 86% 12%, rgba(255, 135, 187, 0.64) 0 8rem, transparent 17rem),
+        linear-gradient(135deg, var(--bg-a), var(--bg-b) 50%, var(--bg-c));
+      overflow-x: hidden;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    body.celebrating {
+      animation: warm-glow 2.8s ease-in-out infinite;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .ambient-hearts,
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .ambient-hearts {
+      z-index: 26;
+      overflow: hidden;
+    }
+
+    #confetti-canvas {
+      z-index: 30;
+    }
+
+    .proposal-page {
+      min-height: calc(100vh - 76px);
+      display: grid;
+      place-items: center;
+      padding: 48px 20px 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .proposal-card {
+      width: min(1120px, 100%);
+      padding: clamp(26px, 4vw, 52px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.56);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      text-align: center;
+      animation: card-arrive 780ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .question-stage {
+      display: grid;
+      grid-template-columns: minmax(150px, 280px) minmax(0, 1fr) minmax(150px, 280px);
+      gap: clamp(16px, 2.8vw, 30px);
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0 auto clamp(28px, 4vw, 40px);
+      isolation: isolate;
+    }
+
+    h1 {
+      margin: 0 auto;
+      max-width: 540px;
+      min-width: 0;
+      color: var(--ink);
+      font-size: clamp(2.35rem, 5vw, 4.95rem);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: 0;
+      position: relative;
+      z-index: 2;
+      text-wrap: balance;
+    }
+
+    .media-placeholder,
+    .gif-slot,
+    .gallery-grid figure {
+      margin: 0;
+      padding: 12px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: var(--soft-shadow);
+      min-width: 0;
+      position: relative;
+      z-index: 1;
+      transition: transform 260ms ease, box-shadow 260ms ease;
+    }
+
+    .media-placeholder {
+      width: 100%;
+      max-width: 280px;
+      justify-self: center;
+    }
+
+    .media-placeholder:hover,
+    .gif-slot:hover,
+    .gallery-grid figure:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 22px 48px rgba(185, 73, 112, 0.2);
+    }
+
+    .media-placeholder img,
+    .gif-slot img,
+    .gallery-grid img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1.24;
+      border-radius: 18px;
+      object-fit: cover;
+    }
+
+    figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      min-height: 86px;
+    }
+
+    .answer-button {
+      min-width: 156px;
+      min-height: 64px;
+      padding: 18px 34px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--white);
+      font-size: 1.28rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 16px 28px rgba(98, 34, 57, 0.22);
+      transition:
+        transform 220ms ease,
+        box-shadow 220ms ease,
+        filter 220ms ease,
+        left 420ms cubic-bezier(0.22, 1, 0.36, 1),
+        top 420ms cubic-bezier(0.22, 1, 0.36, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .yes-button {
+      background: linear-gradient(180deg, #31dc7a, var(--green));
+    }
+
+    .yes-button:hover,
+    .yes-button:focus-visible {
+      transform: scale(1.07) translateY(-2px);
+      box-shadow: 0 20px 36px rgba(21, 150, 76, 0.32);
+      outline: none;
+    }
+
+    .no-button {
+      background: linear-gradient(180deg, #ff6680, var(--red));
+    }
+
+    .no-button:hover,
+    .no-button:focus-visible {
+      filter: saturate(1.1);
+      box-shadow: 0 20px 36px rgba(204, 40, 72, 0.3);
+      outline: none;
+    }
+
+    .no-button.is-floating {
+      position: fixed;
+      z-index: 12;
+      transform: none !important;
+      max-width: calc(100vw - 64px);
+    }
+
+    .date-footer {
+      min-height: 76px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px 28px;
+      color: var(--white);
+      font-size: clamp(1rem, 2.7vw, 1.22rem);
+      font-weight: 800;
+      text-shadow: 0 3px 14px rgba(147, 29, 82, 0.32);
+      position: relative;
+      z-index: 2;
+    }
+
+    .gallery-modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(75, 36, 50, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      backdrop-filter: blur(5px);
+      transition: opacity 260ms ease;
+      z-index: 25;
+    }
+
+    .gallery-modal.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-window {
+      width: min(1180px, 100%);
+      max-height: min(94vh, 900px);
+      overflow: hidden;
+      padding: clamp(16px, 2.2vw, 26px);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      border-radius: 28px;
+      background: rgba(255, 205, 236, 0.97);
+      box-shadow: 0 28px 90px rgba(88, 36, 54, 0.28);
+      position: relative;
+      z-index: 28;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gallery-modal.is-visible .modal-window {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--rose-deep);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(185, 73, 112, 0.16);
+      cursor: pointer;
+      font-size: 1.45rem;
+      font-weight: 900;
+      line-height: 1;
+      z-index: 2;
+      transition: transform 180ms ease, background 180ms ease;
+    }
+
+    .modal-close:hover,
+    .modal-close:focus-visible {
+      transform: scale(1.08);
+      background: var(--white);
+      outline: none;
+    }
+
+    .gallery-layout {
+      display: grid;
+      grid-template-columns: minmax(130px, 190px) minmax(0, 1fr) minmax(130px, 190px);
+      gap: clamp(12px, 2vw, 20px);
+      align-items: center;
+      margin-top: 0;
+    }
+
+    .gif-slot img {
+      aspect-ratio: 0.82;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .gallery-grid figure {
+      padding: 8px;
+      transform: translateY(12px);
+      animation: gallery-pop 560ms ease forwards;
+    }
+
+    .gallery-grid img {
+      aspect-ratio: 1;
+    }
+
+    .gallery-grid figure:nth-child(2) { animation-delay: 55ms; }
+    .gallery-grid figure:nth-child(3) { animation-delay: 110ms; }
+    .gallery-grid figure:nth-child(4) { animation-delay: 165ms; }
+    .gallery-grid figure:nth-child(5) { animation-delay: 220ms; }
+    .gallery-grid figure:nth-child(6) { animation-delay: 275ms; }
+    .gallery-grid figure:nth-child(7) { animation-delay: 330ms; }
+    .gallery-grid figure:nth-child(8) { animation-delay: 385ms; }
+    .gallery-grid figure:nth-child(9) { animation-delay: 440ms; }
+
+    .heart {
+      position: absolute;
+      bottom: -48px;
+      left: var(--left);
+      color: var(--heart-color, rgba(255, 112, 156, 0.46));
+      font-size: var(--size);
+      opacity: 0;
+      filter: drop-shadow(0 8px 12px rgba(190, 64, 104, 0.16));
+      animation: float-heart var(--duration) linear var(--delay) infinite;
+    }
+
+    .heart.burst {
+      animation: burst-heart 2.8s ease-out forwards;
+    }
+
+    @keyframes card-arrive {
+      from {
+        opacity: 0;
+        transform: translateY(22px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes warm-glow {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: rgba(255, 255, 255, 0.22); }
+    }
+
+    @keyframes float-heart {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(0.86);
+      }
+      12% {
+        opacity: 0.9;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift), -112vh, 0) rotate(38deg) scale(1.18);
+      }
+    }
+
+    @keyframes burst-heart {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0) scale(0.65);
+      }
+      18% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--burst-x), var(--burst-y), 0) scale(1.35) rotate(var(--burst-rotate));
+      }
+    }
+
+    @keyframes gallery-pop {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .gallery-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .gif-slot img {
+        aspect-ratio: 1.7;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .proposal-page {
+        align-items: start;
+        padding-top: 24px;
+      }
+
+      .proposal-card {
+        padding: 24px 16px 28px;
+        border-radius: 24px;
+      }
+
+      .question-stage,
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .question-stage h1 {
+        order: -1;
+        max-width: 680px;
+      }
+
+      .media-placeholder img {
+        aspect-ratio: 1.38;
+      }
+
+      .answer-button {
+        min-width: min(100%, 148px);
+        min-height: 58px;
+        padding: 16px 24px;
+        font-size: 1.08rem;
+      }
+
+      .gallery-modal {
+        padding: 12px;
+      }
+
+      .modal-window {
+        border-radius: 22px;
+      }
+    }
+
+    @media (min-width: 761px) and (max-width: 980px) {
+      .question-stage {
+        grid-template-columns: minmax(120px, 210px) minmax(0, 1fr) minmax(120px, 210px);
+        gap: 12px;
+      }
+
+      h1 {
+        max-width: 420px;
+        font-size: clamp(2rem, 4.6vw, 3.8rem);
+      }
+
+      .media-placeholder {
+        max-width: 210px;
+      }
+
+      figcaption {
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-hearts" aria-hidden="true"></div>
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <main class="proposal-page">
+    <section class="proposal-card" aria-labelledby="proposal-title">
+      <div class="question-stage" aria-label="Proposal question with photo or GIF placeholders">
+        <figure class="media-placeholder">
+          <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWg0NHphbXUxOTJoajI3bmJoNHg1M3JzZm5zM2dxcWdjc2xhYXhwOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/kc1qe57aesZgI/giphy.gif">
+          
+          <figcaption></figcaption>
+        </figure>
+
+        <!-- CHANGE THE BIG QUESTION TEXT HERE -->
+        <h1 id="proposal-title">May I be your boyfriend?</h1>
+
+        <figure class="media-placeholder">
+          <!-- REPLACE THIS RIGHT MAIN IMAGE/GIF: -->
+          <img src="https://i.pinimg.com/564x/99/45/52/994552462e9e25c3e7474c0cc4d6aacc.jpg">
+          <figcaption></figcaption>
+        </figure>
+      </div>
+
+      <div class="button-row">
+        <button class="answer-button yes-button" id="yes-button" type="button">Yes ❤️</button>
+        <button class="answer-button no-button" id="no-button" type="button">No 😔</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="date-footer">
+    <!-- CHANGE THE DATE HERE -->
+    <span>❤️</span>
+    <time datetime="2026-07-07">July 11, 2026</time>
+    <span>❤️</span>
+  </footer>
+
+  <section class="gallery-modal" id="gallery-modal" aria-hidden="true" aria-label="Photo gallery popup">
+    <div class="modal-window" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modal-close" type="button" aria-label="Close gallery">×</button>
+
+      <div class="gallery-layout">
+        <figure class="gif-slot">
+          <!-- REPLACE THIS LEFT POPUP GIF:
+               Change the src below to your own GIF, image, hosted link, or base64 data URL.
+          -->
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTySwh_ucZwdAldWONuBuumrjZjBkpy6IWLpit093mU0A&s=10">
+          <figcaption></figcaption>
+        </figure>
+
+        <div class="gallery-grid" aria-label="Nine photo gallery placeholders">
+          <!-- REPLACE GALLERY PHOTO 1 -->
+          <figure>
+            <img src="https://cdn.discordapp.com/attachments/749739609445105784/1524273361725948015/image.jpg?ex=6a4f25b1&is=6a4dd431&hm=e8cab991d36fae7a27bf1790198e6625f7684da8f97303297be73737fd65a1b9&">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 2 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524272591299149824/IMG_2460.jpg?ex=6a4f24f9&is=6a4dd379&hm=eaba2c00ccfa16f666e4477c9694f5f0feed67ba95c34fdd9f87c9a36fc617a1&=&format=webp&width=690&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 3 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524274859369304195/IMG_2800.png?ex=6a4f2716&is=6a4dd596&hm=792c4ec0857c19a31aaf091a595f1850752b3aa9d647de01d46a85b0c0b078f6&=&format=webp&quality=lossless&width=508&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 4 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524274859759243384/IMG_2799.png?ex=6a4f2716&is=6a4dd596&hm=6d7dc4e3665f223155787e66cf8750571dc26220eb286bf7a941348269069ffb&=&format=webp&quality=lossless&width=511&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 5 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524272590921666620/9EE338A4-BC2E-4982-BEF8-337565923423.jpg?ex=6a4f24f9&is=6a4dd379&hm=c15a9d3782a65f011d7ca65b0fc7757a640fce3d138343d4b515f4ee78c72309&=&format=webp&width=518&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 6 -->
+          <figure>
+            <img src="https://cdn.discordapp.com/attachments/749739609445105784/1524274860032000192/IMG_2798.png?ex=6a4f2716&is=6a4dd596&hm=a71295afb81dfbc9e4db99aeb25e59234ac161cce0010bf6ebffa2411bdbfc0c&">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 7 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524274860342116402/IMG_2797.png?ex=6a4f2716&is=6a4dd596&hm=05a2db4c6227ca101472f1818d48f013bb6a8df43a57bac3e58f61def710023d&=&format=webp&quality=lossless&width=560&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 8 -->
+          <figure>
+            <img src="https://media.discordapp.net/attachments/749739609445105784/1524272591966048316/IMG_3790.jpg?ex=6a4f24f9&is=6a4dd379&hm=505bd963971893215982022f3bd7ed9943e6d8b8f13195f80a1769af27f35976&=&format=webp&width=518&height=920">
+          </figure>
+
+          <!-- REPLACE GALLERY PHOTO 9 -->
+          <figure>
+            <img src="https://cdn.discordapp.com/attachments/749739609445105784/1524284264328335481/image.jpg?ex=6a4f2fd8&is=6a4dde58&hm=4f827aa06ffc734c9fa713bb8beb5d5c6031b05e18fb4b980118bafaba6c9e7f&">
+          </figure>
+
+        </div>
+
+        <figure class="gif-slot">
+          <!-- REPLACE THIS RIGHT POPUP GIF:
+               Change the src below to your own GIF, image, hosted link, or base64 data URL.
+          -->
+          <img src="https://media.tenor.com/QI_EpqX1TF0AAAAd/interlinked-twin-interlinked.gif">
+          <figcaption></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const heartsLayer = document.querySelector(".ambient-hearts");
+    const yesButton = document.querySelector("#yes-button");
+    const noButton = document.querySelector("#no-button");
+    const galleryModal = document.querySelector("#gallery-modal");
+    const modalClose = document.querySelector("#modal-close");
+    const confettiCanvas = document.querySelector("#confetti-canvas");
+    const confettiContext = confettiCanvas.getContext("2d");
+
+    const heartColors = [
+      "rgba(255, 93, 139, 0.42)",
+      "rgba(255, 126, 171, 0.46)",
+      "rgba(219, 74, 118, 0.34)",
+      "rgba(255, 190, 208, 0.68)"
+    ];
+
+    let noButtonIsFloating = false;
+    let noButtonMoveTimeout = 0;
+    let confettiPieces = [];
+    let confettiAnimationId = 0;
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function resizeConfettiCanvas() {
+      const pixelRatio = window.devicePixelRatio || 1;
+      confettiCanvas.width = Math.floor(window.innerWidth * pixelRatio);
+      confettiCanvas.height = Math.floor(window.innerHeight * pixelRatio);
+      confettiCanvas.style.width = `${window.innerWidth}px`;
+      confettiCanvas.style.height = `${window.innerHeight}px`;
+      confettiContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    }
+
+    function createHeart(options = {}) {
+      const heart = document.createElement("span");
+      heart.className = options.burst ? "heart burst" : "heart";
+      heart.textContent = "♥";
+      heart.style.setProperty("--left", `${randomBetween(0, 100)}vw`);
+      heart.style.setProperty("--size", `${randomBetween(18, 38)}px`);
+      heart.style.setProperty("--duration", `${randomBetween(12, 22)}s`);
+      heart.style.setProperty("--delay", `${options.delay ?? randomBetween(-20, 0)}s`);
+      heart.style.setProperty("--drift", `${randomBetween(-90, 90)}px`);
+      heart.style.setProperty("--heart-color", heartColors[Math.floor(Math.random() * heartColors.length)]);
+
+      if (options.burst) {
+        heart.style.left = `${options.x ?? randomBetween(20, 80)}vw`;
+        heart.style.bottom = `${options.y ?? 12}vh`;
+        heart.style.setProperty("--burst-x", `${randomBetween(-180, 180)}px`);
+        heart.style.setProperty("--burst-y", `${randomBetween(-240, -80)}px`);
+        heart.style.setProperty("--burst-rotate", `${randomBetween(-38, 38)}deg`);
+        heart.addEventListener("animationend", () => heart.remove(), { once: true });
+      }
+
+      heartsLayer.appendChild(heart);
+    }
+
+    function createAmbientHearts() {
+      for (let index = 0; index < 24; index += 1) {
+        createHeart();
+      }
+    }
+
+    function createCelebrationHearts() {
+      for (let index = 0; index < 28; index += 1) {
+        createHeart({
+          burst: true,
+          x: randomBetween(15, 85),
+          y: randomBetween(3, 24),
+          delay: `${index * 0.018}s`
+        });
+      }
+    }
+
+    function getNoButtonSize() {
+      noButton.style.maxWidth = `calc(100vw - 64px)`;
+
+      return {
+        width: Math.ceil(noButton.offsetWidth || noButton.getBoundingClientRect().width),
+        height: Math.ceil(noButton.offsetHeight || noButton.getBoundingClientRect().height)
+      };
+    }
+
+    function getVisibleViewport() {
+      const viewport = window.visualViewport;
+
+      return {
+        left: viewport ? viewport.offsetLeft : 0,
+        top: viewport ? viewport.offsetTop : 0,
+        width: viewport ? viewport.width : document.documentElement.clientWidth,
+        height: viewport ? viewport.height : document.documentElement.clientHeight
+      };
+    }
+
+    function keepButtonInsideViewport(left, top) {
+      const padding = 32;
+      const viewport = getVisibleViewport();
+      const size = getNoButtonSize();
+      const buttonWidth = Math.min(size.width, viewport.width - padding * 2);
+      const buttonHeight = Math.min(size.height, viewport.height - padding * 2);
+      const minLeft = viewport.left + padding;
+      const minTop = viewport.top + padding;
+      const maxLeft = Math.max(minLeft, viewport.left + viewport.width - buttonWidth - padding);
+      const maxTop = Math.max(minTop, viewport.top + viewport.height - buttonHeight - padding);
+
+      return {
+        left: Math.max(minLeft, Math.min(left, maxLeft)),
+        top: Math.max(minTop, Math.min(top, maxTop))
+      };
+    }
+
+    function floatNoButtonIfNeeded() {
+      if (noButtonIsFloating) {
+        return;
+      }
+
+      const rect = noButton.getBoundingClientRect();
+      document.body.appendChild(noButton);
+      noButton.classList.add("is-floating");
+      noButton.style.maxWidth = `calc(100vw - 64px)`;
+      const position = keepButtonInsideViewport(rect.left, rect.top);
+      noButton.style.left = `${position.left}px`;
+      noButton.style.top = `${position.top}px`;
+      noButtonIsFloating = true;
+    }
+
+    function moveNoButton() {
+      floatNoButtonIfNeeded();
+
+      const rect = noButton.getBoundingClientRect();
+      const padding = 32;
+      const viewport = getVisibleViewport();
+      const size = getNoButtonSize();
+      const minRandomLeft = viewport.left + padding;
+      const minRandomTop = viewport.top + padding;
+      const maxRandomLeft = Math.max(minRandomLeft, viewport.left + viewport.width - size.width - padding);
+      const maxRandomTop = Math.max(minRandomTop, viewport.top + viewport.height - size.height - padding);
+      let nextPosition = keepButtonInsideViewport(
+        randomBetween(minRandomLeft, maxRandomLeft),
+        randomBetween(minRandomTop, maxRandomTop)
+      );
+
+      const currentCenterX = rect.left + rect.width / 2;
+      const currentCenterY = rect.top + rect.height / 2;
+      const nextCenterX = nextPosition.left + rect.width / 2;
+      const nextCenterY = nextPosition.top + rect.height / 2;
+      const distance = Math.hypot(nextCenterX - currentCenterX, nextCenterY - currentCenterY);
+
+      if (distance < 140) {
+        nextPosition = keepButtonInsideViewport(
+          nextPosition.left + randomBetween(150, 260) * (Math.random() > 0.5 ? 1 : -1),
+          nextPosition.top + randomBetween(110, 220) * (Math.random() > 0.5 ? 1 : -1)
+        );
+      }
+
+      noButton.style.left = `${nextPosition.left}px`;
+      noButton.style.top = `${nextPosition.top}px`;
+      noButton.style.maxWidth = `calc(100vw - 64px)`;
+    }
+
+    function handlePointerNearNoButton(event) {
+      const rect = noButton.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+
+      if (distance < 80 && !noButtonMoveTimeout) {
+        moveNoButton();
+        noButtonMoveTimeout = window.setTimeout(() => {
+          noButtonMoveTimeout = 0;
+        }, 360);
+      }
+    }
+
+    function buildConfettiPiece() {
+      const colors = ["#ff6f9f", "#ffd166", "#24c76a", "#ffffff", "#ffb3ca", "#8bd3ff"];
+
+      return {
+        x: randomBetween(0, window.innerWidth),
+        y: randomBetween(-window.innerHeight, -20),
+        size: randomBetween(6, 12),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speed: randomBetween(2.8, 6.4),
+        drift: randomBetween(-1.2, 1.2),
+        rotation: randomBetween(0, Math.PI * 2),
+        spin: randomBetween(-0.18, 0.18),
+        life: randomBetween(90, 160)
+      };
+    }
+
+    function drawConfetti() {
+      confettiContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      confettiPieces = confettiPieces.filter((piece) => piece.life > 0);
+
+      confettiPieces.forEach((piece) => {
+        piece.x += piece.drift;
+        piece.y += piece.speed;
+        piece.rotation += piece.spin;
+        piece.life -= 1;
+
+        confettiContext.save();
+        confettiContext.translate(piece.x, piece.y);
+        confettiContext.rotate(piece.rotation);
+        confettiContext.fillStyle = piece.color;
+        confettiContext.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * 0.62);
+        confettiContext.restore();
+      });
+
+      if (confettiPieces.length > 0) {
+        confettiAnimationId = requestAnimationFrame(drawConfetti);
+      } else {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    }
+
+    function launchConfetti() {
+      confettiPieces = Array.from({ length: 180 }, buildConfettiPiece);
+      cancelAnimationFrame(confettiAnimationId);
+      drawConfetti();
+    }
+
+    function openGalleryModal() {
+      document.body.classList.add("celebrating", "modal-open");
+      galleryModal.classList.add("is-visible");
+      galleryModal.setAttribute("aria-hidden", "false");
+      modalClose.focus();
+    }
+
+    function closeGalleryModal() {
+      document.body.classList.remove("modal-open");
+      galleryModal.classList.remove("is-visible");
+      galleryModal.setAttribute("aria-hidden", "true");
+      yesButton.focus();
+    }
+
+    function celebrateYes() {
+      openGalleryModal();
+      launchConfetti();
+      createCelebrationHearts();
+
+      // ADD MUSIC LATER HERE:
+      // const audio = new Audio("your-song.mp3");
+      // audio.play();
+    }
+
+    yesButton.addEventListener("click", celebrateYes);
+    modalClose.addEventListener("click", closeGalleryModal);
+
+    galleryModal.addEventListener("click", (event) => {
+      if (event.target === galleryModal) {
+        closeGalleryModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && galleryModal.classList.contains("is-visible")) {
+        closeGalleryModal();
+      }
+    });
+
+    document.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "mouse") {
+        handlePointerNearNoButton(event);
+      }
+    });
+
+    noButton.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse") {
+        event.preventDefault();
+        moveNoButton();
+      }
+    });
+
+    noButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      moveNoButton();
+    });
+
+    window.addEventListener("resize", () => {
+      resizeConfettiCanvas();
+
+      if (noButtonIsFloating) {
+        const rect = noButton.getBoundingClientRect();
+        const position = keepButtonInsideViewport(rect.left, rect.top);
+        noButton.style.left = `${position.left}px`;
+        noButton.style.top = `${position.top}px`;
+      }
+    });
+
+    resizeConfettiCanvas();
+    createAmbientHearts();
+  </script>
+</body>
+</html>
